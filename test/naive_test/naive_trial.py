@@ -10,6 +10,7 @@ print('params:', params)
 x = params['x']
 
 for i in range(1, 10):
+    print('send metrics:', x, i)
     nni.report_intermediate_result(x ** i)
     time.sleep(0.5)
 

@@ -28,6 +28,22 @@ jobs:
       cd test
       python naive_test.py
     displayName: 'Naive test'
+  - script: |
+      cd test
+      python naive_test.py
+    displayName: 'Naive test 2'
+  - script: |
+      cd test
+      python naive_test.py
+    displayName: 'Naive test 3'
+  - script: |
+      cd test
+      python naive_test.py
+    displayName: 'Naive test 4'
+  - script: |
+      cd test
+      python naive_test.py
+    displayName: 'Naive test 5'
 #  - script: |
 #      cd test
 #      python tuner_test.py

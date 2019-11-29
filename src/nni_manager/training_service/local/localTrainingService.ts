@@ -521,10 +521,16 @@ class LocalTrainingService implements TrainingService {
         await fs.promises.writeFile(path.join(trialJobDetail.workingDirectory, scriptName),
                                     runScriptContent.join(getNewLine()), { encoding: 'utf8', mode: 0o777 });
         await this.writeParameterFile(trialJobDetail.workingDirectory, trialJobDetail.form.hyperParameters);
+        const trialJobProcess: cp.ChildProcess = runScript(path.join(trialJobDetail.workingDirectory, scriptName));
+        this.setTrialJobStatus(trialJobDetail, 'RUNNING');
+        trialJobDetail.startTime = Date.now();
+        trialJobDetail.pid = trialJobProcess.pid;
+        this.setExtraProperties(trialJobDetail, resource);
 
         let buffer: Buffer = Buffer.alloc(0);
         const stream: ts.Stream = ts.createReadStream(path.join(trialJobDetail.workingDirectory, '.nni', 'metrics'));
         stream.on('data', (data: Buffer) => {
+            this.log.debug(`stream ${data}`);
             buffer = Buffer.concat([buffer, data]);
             while (buffer.length > 0) {
                 const [success, , content, remain] = decodeCommand(buffer);
@@ -539,12 +545,6 @@ class LocalTrainingService implements TrainingService {
                 buffer = remain;
             }
         });
-
-        const trialJobProcess: cp.ChildProcess = runScript(path.join(trialJobDetail.workingDirectory, scriptName));
-        this.setTrialJobStatus(trialJobDetail, 'RUNNING');
-        trialJobDetail.startTime = Date.now();
-        trialJobDetail.pid = trialJobProcess.pid;
-        this.setExtraProperties(trialJobDetail, resource);
         this.jobStreamMap.set(trialJobDetail.id, stream);
     }
 
