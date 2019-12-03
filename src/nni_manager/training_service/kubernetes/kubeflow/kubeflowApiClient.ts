@@ -29,6 +29,9 @@ abstract class KubeflowOperatorClient extends KubernetesCRDClient {
                     case 'v1beta2': {
                         return new TFOperatorClientV1Beta2();
                     }
+                    case 'v1': {
+                        return new TFOperatorClientV1();
+                    }
                     default:
                         throw new Error(`Invalid tf-operator apiVersion ${operatorApiVersion}`);
                 }
@@ -105,6 +108,25 @@ class TFOperatorClientV1Beta2 extends KubernetesCRDClient {
 
     protected get operator(): any {
         return this.client.apis['kubeflow.org'].v1beta2.namespaces('default').tfjobs;
+    }
+
+    public get containerName(): string {
+        return 'tensorflow';
+    }
+}
+
+class TFOperatorClientV1 extends KubernetesCRDClient {
+    /**
+     * constructor, to initialize tfjob CRD definition
+     */
+    public constructor() {
+        super();
+        this.crdSchema = JSON.parse(fs.readFileSync('./config/kubeflow/tfjob-crd-v1.json', 'utf8'));
+        this.client.addCustomResourceDefinition(this.crdSchema);
+    }
+
+    protected get operator(): any {
+        return this.client.apis['kubeflow.org'].v1.namespaces('default').tfjobs;
     }
 
     public get containerName(): string {
